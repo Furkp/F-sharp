@@ -1,6 +1,6 @@
 module MultiSet
 
-type MultiSet<'a when 'a : comparison> = Map<'a,uint32>
+type MultiSet<'a when 'a : comparison> = MultiSet of Map<'a,uint32>
 
 val empty : MultiSet<'a>
 
