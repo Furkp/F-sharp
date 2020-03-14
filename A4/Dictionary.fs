@@ -36,3 +36,4 @@ let rec lookup (s:string) =
         -> lookup (s.Substring 1) (m.Item (s.Chars 0))
     | Node(_, _) 
         -> false
+  
