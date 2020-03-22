@@ -111,7 +111,7 @@ module ImpParser =
 
     let ModParse = binop (pchar '%') AtomParse ProdParse |>> Mod <?> "Mod"
 
-    let NegParse = unop (pchar '-') AtomParse  |>> (fun a -> Mul (a, N(-1))) <?> "Neg"
+    let NegParse = unop (pchar '-') AtomParse  |>> (fun a -> Mul (N(-1), a)) <?> "Neg"
 
     let WLParse = pstring "wordLength" >*>. pid |>> (fun a -> N a.Length) <?> "WL"
     
@@ -158,12 +158,12 @@ module ImpParser =
     let AndParse = Bool2Parse .>*> pstring "/\\" .>*>. BoolParse |>> Conj <?> "Conj"
     let OrParse =  Bool2Parse .>*> pstring "\\/" .>*>. BoolParse |>> (fun (a, b) -> Not(a), Not(b)) |>> Conj |>> Not <?> "Disj"
 
-    let EqParse =  TermParse .>*> pstring "=" .>*>. TermParse |>> AEq <?> "AEq"
-    let NEqParse =  TermParse .>*> pstring "<>" .>*>. TermParse |>> AEq |>> Not <?> "Not Equal"
-    let LTParse =  TermParse .>*> pstring "<" .>*>. TermParse |>> ALt <?> "Less than"
-    let LTEParse =  TermParse .>*> pstring "<=" .>*>. TermParse |>> (fun a -> (a |> ALt |> Not), (a |> AEq |> Not |> Not |> Not)) |>> Conj |>> Not <?> "Less than/Equal"
-    let GTParse =  TermParse .>*> pstring ">" .>*>. TermParse |>> (fun a -> ((a |> AEq |> Not), (a |> ALt |> Not))) |>> Conj  <?> "Greater than"
-    let GTEParse =  TermParse .>*> pstring ">=" .>*>. TermParse |>> ALt |>> Not <?> "Greater than/Equal"
+    let EqParse =  AtomParse .>*> pstring "=" .>*>. TermParse |>> AEq <?> "AEq"
+    let NEqParse =  AtomParse .>*> pstring "<>" .>*>. TermParse |>> AEq |>> Not <?> "Not Equal"
+    let LTParse =  AtomParse .>*> pstring "<" .>*>. TermParse |>> ALt <?> "Less than"
+    let LTEParse =  AtomParse .>*> pstring "<=" .>*>. TermParse |>> (fun a -> (a |> ALt |> Not), (a |> AEq |> Not |> Not |> Not)) |>> Conj |>> Not <?> "Less than/Equal"
+    let GTParse =  AtomParse .>*> pstring ">" .>*>. TermParse |>> (fun a -> ((a |> AEq |> Not), (a |> ALt |> Not))) |>> Conj  <?> "Greater than"
+    let GTEParse =  AtomParse .>*> pstring ">=" .>*>. TermParse |>> ALt |>> Not <?> "Greater than/Equal"
     
     let NotParse = pstring "~" >>. BoolParse |>> Not <?> "Not"
 
