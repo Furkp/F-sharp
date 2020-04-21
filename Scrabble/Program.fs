@@ -30,7 +30,7 @@ let main argv =
 //    let board      = InfiniteHoleBoard.infiniteHoleBoard ()
 
     let alphabet   = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-    let dictionary = readLines "../../../EnglishDictionary.txt"
+    let dictionary = readLines "./EnglishDictionary.txt"
     let handSize   = 7u
     let timeout    = None
     let tiles      = English.tiles 1u
