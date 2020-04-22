@@ -45,13 +45,23 @@
     let push : SM<unit> = 
         S (fun s -> Success ((), {s with vars = Map.empty :: s.vars}))
 
-    let pop : SM<unit> = failwith "Not implemented"      
+    let pop : SM<unit> = 
+        S (fun s -> Success ((), {s with vars = s.vars.Tail}))      
 
-    let wordLength : SM<int> = failwith "Not implemented"      
+    let wordLength : SM<int> =
+       S (fun s -> Success (s.word.Length, s))    
 
-    let characterValue (pos : int) : SM<char> = failwith "Not implemented"      
+    let characterValue (pos : int) : SM<char> = 
+        S (fun s -> if pos < s.word.Length then
+                        Success (fst <| s.word.[pos], s)    
+                    else 
+                        Failure (IndexOutOfBounds pos))
 
-    let pointValue (pos : int) : SM<int> = failwith "Not implemented"      
+    let pointValue (pos : int) : SM<int> = 
+        S (fun s -> if pos < s.word.Length && pos >= 0 then
+                        Success (snd <| s.word.[pos], s)    
+                    else 
+                        Failure (IndexOutOfBounds pos))
 
     let lookup (x : string) : SM<int> = 
         let rec aux =
@@ -67,8 +77,25 @@
               | Some v -> Success (v, s)
               | None   -> Failure (VarNotFound x))
 
-    let declare (var : string) : SM<unit> = failwith "Not implemented"   
-    let update (var : string) (value : int) : SM<unit> = failwith "Not implemented"      
-              
+    let declare (var : string) : SM<unit> = 
+        S (fun s -> 
+            match s.vars.Head with
+            | _ when s.reserved.Contains var 
+                -> Failure (ReservedName var)
+            | m when m.ContainsKey var 
+                -> Failure (VarExists var)
+            | m -> Success((), {s with vars = m.Add (var, 0)::s.vars.Tail}))
 
-    
+    let update (var : string) (value : int) : SM<unit> = 
+        let rec aux c = 
+            function
+            | []    -> None
+            | m :: ms -> 
+                match Map.tryFind var m with
+                | Some _    -> Some (c <| m.Add(var, value)::ms)
+                | None      -> aux (fun v -> c(m::v)) ms
+
+        S (fun s ->
+            match aux id (s.vars) with
+            | Some v    -> Success ((), {s with vars = v})
+            | None      -> Failure (VarNotFound var))

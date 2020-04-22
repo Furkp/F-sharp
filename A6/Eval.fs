@@ -3,14 +3,29 @@
     open StateMonad
 
     (* Code for testing *)
-
-    let hello = [(* INSERT YOUR DEFINITON OF HELLO HERE.*)] 
-    let state = mkState [("x", 5); ("y", 42)] hello ["_pos_"; "_result_"]
-    let emptyState = mkState [] [] []
     
-    let add a b = failwith "Not implemented"      
-    let div a b = failwith "Not implemented"      
+    let hello = [
+        ('H', 4)
+        ('E', 1)
+        ('L', 1)
+        ('L', 1)
+        ('O', 1)]
 
+    let state = mkState [("x", 5); ("y", 42)] hello ["_pos_"; "_result_"]
+    
+    let emptyState = mkState [] [] []
+
+    let add a b = a >>= 
+        (fun v1 -> b >>= 
+            (fun v2 -> ret (v1+v2)))
+
+    let div a b = a >>= 
+        (fun v1 -> b >>= 
+            (fun v2 -> 
+                match v2 with
+                | 0 -> fail DivisionByZero
+                | n -> ret (v1/v2)))
+     
     type aExp =
         | N of int
         | V of string
@@ -61,12 +76,65 @@
     let (.>=.) a b = ~~(a .<. b)                (* numeric greater than or equal to *)
     let (.>.) a b = ~~(a .=. b) .&&. (a .>=. b) (* numeric greater than *)    
 
-    let arithEval a : SM<int> = failwith "Not implemented"      
+    let sub a b = a >>= 
+        (fun v1 -> b >>= 
+            (fun v2 -> ret (v1-v2)))
 
-    let charEval c : SM<char> = failwith "Not implemented"      
+    let mul a b = a >>= 
+        (fun v1 -> b >>= 
+            (fun v2 -> ret (v1*v2)))
 
-    let boolEval b : SM<bool> = failwith "Not implemented"
+    let md a b = a >>= 
+        (fun v1 -> b >>= 
+            (fun v2 -> match v2 with
+                | 0 -> fail DivisionByZero
+                | n -> ret (v1/v2)))
+            
+    let isVowel c = 
+        match System.Char.ToLower(c) with
+        | 'a' |'e' |'i' | 'o' | 'u' -> true
+        | _ -> false
 
+    let isConsonant c =
+        System.Char.IsLetter(c) && not (isVowel(c))
+
+    let rec arithEval a : SM<int> = 
+        match a with
+            | N x -> ret x
+            | V x -> lookup x
+            | WL -> wordLength 
+            | PV x -> arithEval x >>= pointValue
+            | Add(x, y) -> add (arithEval x) (arithEval y)
+            | Sub(x, y) -> sub (arithEval x) (arithEval y)
+            | Mul(x, y) -> mul (arithEval x) (arithEval y)
+            | Div(x, y) -> div (arithEval x) (arithEval y)
+            | Mod(x, y) -> md (arithEval x) (arithEval y)
+            | CharToInt(x) -> (charEval x) >>= (fun v -> ret (int v)) 
+    
+    and charEval c : SM<char> = 
+        match c with
+            | C(x) -> ret x
+            | CV(x) -> arithEval x >>= characterValue
+            | ToUpper(x) -> charEval x >>= (fun v -> ret (System.Char.ToUpper v))
+            | ToLower(x) -> charEval x >>= (fun v -> ret (System.Char.ToLower v))
+            | IntToChar(x) -> arithEval x >>= (fun v -> ret (char v))
+   
+    and boolEval b : SM<bool> = 
+        match b with 
+            | TT -> ret true               
+            | FF -> ret false    
+            | AEq(x, y) -> arithEval x >>= 
+                (fun v1 -> arithEval y >>= 
+                    (fun v2 -> ret (v1 = v2)))
+            | ALt(x, y) -> arithEval x >>= 
+                (fun v1 -> arithEval y >>= 
+                    (fun v2 -> ret (v1 < v2)))
+            | Not(x) -> boolEval x >>= fun v -> ret (not v)     
+            | Conj(x, y) -> boolEval x >>= 
+                (fun v1 -> boolEval y >>= 
+                    (fun v2 -> ret (v1 && v2)))
+            | IsVowel(x) -> charEval x >>= fun v -> ret (isVowel v)
+            | IsConsonant(x) -> charEval x >>= fun v -> ret (isConsonant v)
 
     type stm =                (* statements *)
     | Declare of string       (* variable declaration *)
@@ -76,8 +144,24 @@
     | ITE of bExp * stm * stm (* if-then-else statement *)
     | While of bExp * stm     (* while statement *)
 
-    let rec stmntEval stmnt : SM<unit> = failwith "Not implemented"
+    let rec stmntEval stmnt : SM<unit> = 
+        match stmnt with
+            | Declare(x) -> declare x
+            | Skip -> ret ()
+            | Ass(x, a) -> arithEval a >>= update x
+            | Seq(stm1, stm2) -> stmntEval stm1 >>>= stmntEval stm2
+            | ITE(guard, stm1, stm2) -> boolEval guard >>= (fun v -> 
+                    if(v) then
+                        push >>>= stmntEval stm1 >>>= pop
+                    else
+                        push >>>= stmntEval stm1 >>>= pop)
+            | While(guard, stm) -> boolEval guard >>= (fun v -> 
+                    if(v) then
+                        push >>>= stmntEval (While(guard, stm)) >>>= pop
+                    else
+                        ret ())
 
+(*
 (* Part 3 (Optional) *)
 
     type StateBuilder() =
@@ -117,4 +201,4 @@
     }
 
     let mkBoard c defaultSq boardStmnt ids = failwith "Not implemented"
-    
+*)
