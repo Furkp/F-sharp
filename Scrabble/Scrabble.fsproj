@@ -6,11 +6,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="MultiSet.fsi" />
-    <Compile Include="MultiSet.fs" />
-    <Compile Include="Scrabble.fsi" />
-    <Compile Include="Scrabble.fs" />
-    <Compile Include="ScrabbleNutBot.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
 
@@ -30,7 +25,11 @@
     <PackageReference Include="FParsec" Version="1.1.1" />
     <PackageReference Include="FSharp.Quotations.Evaluator" Version="2.1.0" />
     <PackageReference Include="FsPickler" Version="5.3.1" />
-    <PackageReference Update="FSharp.Core" Version="4.7.1"/>
+    <PackageReference Update="FSharp.Core" Version="4.7.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="NutBot\NutBot.fsproj" />
   </ItemGroup>
 
 </Project>

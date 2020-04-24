@@ -1,7 +1,6 @@
 ﻿// Learn more about F# at http://fsharp.org
 
 open System
-
 open ScrabbleUtil
 
 let readLines filePath = System.IO.File.ReadLines(filePath) |> List.ofSeq
@@ -40,7 +39,7 @@ let main argv =
     let players    = spawnMultiples "Oxy" Oxyphenbutazone.Startup.startGame 2
 
     // Uncomment this line to call your client
-//  let players    = [("Your name here", YourClientName.Scrabble.startGame)] 
+    let players    = [("Nut", NutBot.Scrabble.startGame)] 
 
  
     do ScrabbleServer.Comm.startGame 

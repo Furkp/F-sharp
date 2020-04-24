@@ -1,4 +1,4 @@
-namespace ScrabbleTemplate
+namespace NutBot
 
 open ScrabbleLib
 
