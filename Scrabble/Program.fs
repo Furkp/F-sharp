@@ -37,7 +37,7 @@ let main argv =
     let seed       = None
     let port       = 13001
 
-    let players    = spawnMultiples "Scrabble" Scrabble.Startup.startGame 2
+    let players    = spawnMultiples "Oxy" Oxyphenbutazone.Startup.startGame 2
 
     // Uncomment this line to call your client
 //  let players    = [("Your name here", YourClientName.Scrabble.startGame)] 
