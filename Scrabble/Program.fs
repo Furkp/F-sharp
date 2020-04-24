@@ -4,6 +4,8 @@ open System
 
 open ScrabbleUtil
 
+open ScrabbleNutBot
+
 let readLines filePath = System.IO.File.ReadLines(filePath) |> List.ofSeq
 
 let spawnMultiples name bot =
@@ -37,7 +39,7 @@ let main argv =
     let seed       = None
     let port       = 13001
 
-    let players    = spawnMultiples "Oxyphenbutazone" Oxyphenbutazone.Startup.startGame 2
+    let players    = spawnMultiples "ScrabbleNutBot" ScrabbleNutBot.Startup.startGame 2
 
     // Uncomment this line to call your client
 //  let players    = [("Your name here", YourClientName.Scrabble.startGame)] 
