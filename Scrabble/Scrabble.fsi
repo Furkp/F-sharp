@@ -1,5 +1,4 @@
-﻿
-namespace ScrabbleTemplate
+﻿namespace ScrabbleTemplate
 
 module Scrabble =
 
