@@ -6,7 +6,7 @@ open Eval
     
 [<EntryPoint>]
 let main argv =
-    
+    (*
     printfn "Testing lookup:"
     printfn "%A" (lookup "x" |> 
                   evalSM state)
@@ -243,6 +243,7 @@ let main argv =
                   evalSM state)
     printfn ""
 
+*)
     let arithSingleLetterScore = PV (V "_pos_") .+. (V "_acc_")
     let arithDoubleLetterScore = ((N 2) .*. PV (V "_pos_")) .+. (V "_acc_")
     let arithTripleLetterScore = ((N 3) .*. PV (V "_pos_")) .+. (V "_acc_")
@@ -286,7 +287,6 @@ let main argv =
     printfn "%A" (oddConsonants hello 5 50)
     printfn "%A" (oddConsonants [('H', 4); ('E', 1); ('L', 1)] 5 50)
     printfn ""
-    
     let emptyBoard = Skip
     let singleLetterBoard = Ass ("_result_", N 0)
 
@@ -374,6 +374,7 @@ let main argv =
                (3, stmntDoubleWordScore); (4, stmntTripleWordScore)]
     printfn ""
 
+   
 
     printfn "Testing mkBoard"
     let standardBoard = 

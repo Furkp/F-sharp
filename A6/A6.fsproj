@@ -1,42 +1,18 @@
-<Project ToolsVersion="4.0" DefaultTargets="Build">
+<Project Sdk="Microsoft.NET.Sdk">
+
   <PropertyGroup>
-    <AssemblyName>A6</AssemblyName>
-    <RootNamespace>A6</RootNamespace>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">anycpu</Platform>
-    <ProjectGuid>d308af8d-a3b7-4eb0-a4dd-4b1254bd9c6d</ProjectGuid>
     <OutputType>Exe</OutputType>
-    <TargetFrameworkVersion>v4.5.1</TargetFrameworkVersion>
+    <TargetFramework>netcoreapp2.1</TargetFramework>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|anycpu' ">
-    <DebugSymbols>true</DebugSymbols>
-    <Optimize>false</Optimize>
-    <OutputPath>bin\Debug</OutputPath>
-    <DefineConstants>DEBUG</DefineConstants>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|anycpu' ">
-    <Optimize>true</Optimize>
-    <OutputPath>bin\Release</OutputPath>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(VisualStudioVersion)' == '10.0' OR '$(VisualStudioVersion)' == '11.0'">
-    <FSharpTargetsPath>$(MSBuildExtensionsPath32)\..\Microsoft SDKs\F#\3.0\Framework\v4.0\Microsoft.FSharp.Targets</FSharpTargetsPath>
-  </PropertyGroup>
+
   <ItemGroup>
-    <Compile Include="AssemblyInfo.fs" />
     <Compile Include="StateMonad.fsi" />
     <Compile Include="StateMonad.fs" />
     <Compile Include="Eval.fs" />
     <Compile Include="Program.fs" />
-    <None Include="packages.config" />
   </ItemGroup>
+
   <ItemGroup>
-    <Reference Include="mscorlib" />
-    <Reference Include="System" />
-    <Reference Include="System.Core" />
-    <Reference Include="System.Numerics" />
-    <Reference Include="FSharp.Core">
-      <HintPath>..\packages\FSharp.Core.4.7.0\lib\net45\FSharp.Core.dll</HintPath>
-    </Reference>
+       <PackageReference Update="FSharp.Core" Version="4.7.1" />
   </ItemGroup>
-  <Import Project="$(FSharpTargetsPath)" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" />
 </Project>

@@ -15,13 +15,13 @@
     
     let emptyState = mkState [] [] []
 
-    let add a b = a >>= 
-        (fun v1 -> b >>= 
-            (fun v2 -> ret (v1+v2)))
+    let add a b = 
+        a >>= (fun v1 -> 
+            b >>= (fun v2 -> ret (v1+v2)))
 
-    let div a b = a >>= 
-        (fun v1 -> b >>= 
-            (fun v2 -> 
+    let div a b = 
+        a >>= (fun v1 -> 
+            b >>= (fun v2 -> 
                 match v2 with
                 | 0 -> fail DivisionByZero
                 | n -> ret (v1/v2)))
@@ -76,17 +76,18 @@
     let (.>=.) a b = ~~(a .<. b)                (* numeric greater than or equal to *)
     let (.>.) a b = ~~(a .=. b) .&&. (a .>=. b) (* numeric greater than *)    
 
-    let sub a b = a >>= 
-        (fun v1 -> b >>= 
-            (fun v2 -> ret (v1-v2)))
+    let sub a b = 
+        a >>= (fun v1 -> 
+            b >>= (fun v2 -> ret (v1-v2)))
 
-    let mul a b = a >>= 
-        (fun v1 -> b >>= 
-            (fun v2 -> ret (v1*v2)))
+    let mul a b = 
+        a >>= (fun v1 -> 
+            b >>= (fun v2 -> ret (v1*v2)))
 
-    let md a b = a >>= 
-        (fun v1 -> b >>= 
-            (fun v2 -> match v2 with
+    let md a b = 
+        a >>= (fun v1 -> 
+            b >>= (fun v2 -> 
+                match v2 with
                 | 0 -> fail DivisionByZero
                 | n -> ret (v1/v2)))
             
@@ -123,16 +124,16 @@
         match b with 
             | TT -> ret true               
             | FF -> ret false    
-            | AEq(x, y) -> arithEval x >>= 
-                (fun v1 -> arithEval y >>= 
-                    (fun v2 -> ret (v1 = v2)))
-            | ALt(x, y) -> arithEval x >>= 
-                (fun v1 -> arithEval y >>= 
-                    (fun v2 -> ret (v1 < v2)))
+            | AEq(x, y) -> 
+                arithEval x >>= (fun v1 -> 
+                    arithEval y >>= (fun v2 -> ret (v1 = v2)))
+            | ALt(x, y) -> 
+                arithEval x >>= (fun v1 -> 
+                    arithEval y >>= (fun v2 -> ret (v1 < v2)))
             | Not(x) -> boolEval x >>= fun v -> ret (not v)     
-            | Conj(x, y) -> boolEval x >>= 
-                (fun v1 -> boolEval y >>= 
-                    (fun v2 -> ret (v1 && v2)))
+            | Conj(x, y) -> 
+                boolEval x >>= (fun v1 -> 
+                    boolEval y >>= (fun v2 -> ret (v1 && v2)))
             | IsVowel(x) -> charEval x >>= fun v -> ret (isVowel v)
             | IsConsonant(x) -> charEval x >>= fun v -> ret (isConsonant v)
 
@@ -154,16 +155,16 @@
                     if(v) then
                         push >>>= stmntEval stm1 >>>= pop
                     else
-                        push >>>= stmntEval stm1 >>>= pop)
+                        push >>>= stmntEval stm2 >>>= pop)
             | While(guard, stm) -> boolEval guard >>= (fun v -> 
                     if(v) then
-                        push >>>= stmntEval (While(guard, stm)) >>>= pop
+                        push >>>= stmntEval stm >>>= stmntEval (While(guard, stm)) >>>= pop
                     else
                         ret ())
 
 (*
 (* Part 3 (Optional) *)
-
+*)
     type StateBuilder() =
 
         member this.Bind(f, x)    = f >>= x
@@ -174,31 +175,127 @@
         
     let prog = new StateBuilder()
 
-    let arithEval2 a = failwith "Not implemented"
-    let charEval2 c = failwith "Not implemented"
-    let rec boolEval2 b = failwith "Not implemented"
+    let rec arithEval2 a = 
+        match a with
+            | N x -> prog { return x }
+            | V x -> prog { return! lookup x }
+            | WL -> prog { return! wordLength }
+            | PV x -> prog { 
+                let! ax = arithEval2 x 
+                return! pointValue ax }
+            | Add(x, y) -> prog { return! add (arithEval2 x) (arithEval2 y) }
+            | Sub(x, y) -> prog { return! sub (arithEval2 x) (arithEval2 y) }
+            | Mul(x, y) -> prog { return! mul (arithEval2 x) (arithEval2 y) }
+            | Div(x, y) -> prog { return! div (arithEval2 x) (arithEval2 y) }
+            | Mod(x, y) -> prog { return! md (arithEval2 x) (arithEval2 y) }
+            | CharToInt(x) -> prog {
+                let! c = charEval2 x
+                return int (c)
+            }
 
-    let stmntEval2 stm = failwith "Not implemented"
+    and charEval2 c = 
+        match c with
+            | C(x) -> prog { return x }
+            | CV(x) -> prog {
+                let! a = arithEval2 x
+                return! characterValue a}
+            | ToUpper(x) -> prog {
+                let! c = charEval x
+                return System.Char.ToUpper c }
+            | ToLower(x) -> prog {
+                let! c = charEval x
+                return System.Char.ToLower c }
+            | IntToChar(x) -> prog {
+                let! c = arithEval2 x
+                return char c }
+            
+    and boolEval2 b = 
+            match b with 
+                | TT -> prog { return true }               
+                | FF -> prog { return false }    
+                | AEq(x, y) ->  prog { 
+                    let! ax = arithEval2 x
+                    let! ay = arithEval2 y 
+                    return (ax = ay) }
+                | ALt(x, y) -> prog { 
+                    let! ax = arithEval2 x
+                    let! ay = arithEval2 y 
+                    return (ax < ay) }
+                | Not(x) -> prog { 
+                    let! b = boolEval2 x
+                    return not b }
+                | Conj(x, y) -> prog { 
+                    let! ax = boolEval2 x
+                    let! ay = boolEval2 y 
+                    return (ax && ay) }
+                | IsVowel(x) -> prog { 
+                    let! c = charEval2 x
+                    return isVowel c }
+                | IsConsonant(x) -> prog { 
+                    let! c = charEval2 x
+                    return isConsonant c }
+
+
+    let rec stmntEval2 stm : SM<unit> = 
+        match stm with
+            | Declare(x) -> prog { do! declare x }  
+            | Skip -> prog { return () }  
+            | Ass(x, a) -> prog { 
+                let! av = arithEval2 a
+                do! update x av
+             }  
+            | Seq(stm1, stm2) -> prog { 
+                do! stmntEval2 stm1 
+                do! stmntEval2 stm2 }
+            | ITE(guard, stm1, stm2) -> prog {
+                let! b = boolEval2 guard
+                if(b) then
+                    do! push
+                    do! stmntEval2 stm1 
+                    do! pop
+                else
+                    do! push
+                    do! stmntEval2 stm2 
+                    do! pop}
+            | While(guard, stm) -> prog {
+                let! b = boolEval2 guard
+                if(b) then
+                    do! push
+                    do! stmntEval2 stm
+                    do! stmntEval2 <| While(guard, stm)
+                    do! pop
+                else
+                    return ()}
 
 (* Part 4 (Optional) *) 
 
     type word = (char * int) list
     type squareFun = word -> int -> int -> Result<int, Error>
 
-    let stmntToSquareFun stm = failwith "Not implemented"
-
-
+    let stmntToSquareFun stm : squareFun = 
+        (fun w pos acc -> 
+            (stmntEval2 stm) >>>= lookup "_result_" |> 
+            evalSM (mkState [("_pos_", pos); ("_acc_", acc); ("_result_", 0)] w ["_pos_"; "_acc_"; "_result_"]))
+        
     type coord = int * int
 
     type boardFun = coord -> Result<squareFun option, Error> 
 
-    let stmntToBoardFun stm m = failwith "Not implemented"
-
+    let stmntToBoardFun stm (m: Map<int, squareFun>) : boardFun = 
+        let f x y =  (stmntEval2 stm) >>>= lookup "_result_" |> 
+                                    evalSM (mkState [("_x_", x); ("_y_", y); ("_result_", 0)] [] ["_x_"; "_y_"; "_result_"])
+        (fun (x, y) ->
+            match f x y with
+                | Success id -> Success <| m.TryFind(id)
+                | Failure e -> Failure e)
+    
     type board = {
         center        : coord
         defaultSquare : squareFun
         squares       : boardFun
     }
 
-    let mkBoard c defaultSq boardStmnt ids = failwith "Not implemented"
-*)
+    let mkBoard c defaultSq boardStmnt ids = 
+       { center = c;
+         defaultSquare = stmntToSquareFun defaultSq;
+         squares = stmntToBoardFun boardStmnt (List.map (fun (x, y) -> (x, stmntToSquareFun y)) ids |> Map.ofList)}
