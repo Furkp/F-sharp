@@ -64,11 +64,11 @@ module Scrabble =
             Print.printHand pieces (State.hand st)
 
             // remove the force print when you move on from manual input (or when you have learnt the format)
-            //let input =  System.Console.ReadLine()
-            //let move = RegEx.parseMove input
+            let input =  System.Console.ReadLine()
+            let move = RegEx.parseMove input
 
             debugPrint (sprintf "Player %d -> Server:\n%A\n" (State.playerNumber st) (SMPass)) // keep the debug lines. They are useful.
-            send cstream (SMPass)
+            send cstream (SMPlay move)
 
             let msg = recv cstream
             debugPrint (sprintf "Player %d <- Server:\n%A\n" (State.playerNumber st) msg) // keep the debug lines. They are useful.
@@ -76,19 +76,33 @@ module Scrabble =
             match msg with
             | RCM (CMPassed i) -> 
                 (* your idiot of a enemy passed*)
-                debugPrint "Enemy passed"
+                debugPrint "Enemy passed" 
+                debugPrint (sprintf "id: %d" i)
                 let st' = st // This state needs to be updated
                 aux st'
             | RCM (CMPlaySuccess(ms, points, newPieces)) ->
                 (* Successful play by you. Update your state (remove old tiles, add the new ones, change turn, etc) *)
-                let st' = st // This state needs to be updated
+                debugPrint "CMPlaySuccess"
+                debugPrint (sprintf "ms: %A" ms)
+                debugPrint (sprintf "points: %d" points)
+                debugPrint (sprintf "newPieces: %A" newPieces)
+                let remPieces = List.fold (fun acc (c, (id, (ch, p))) -> MultiSet.removeSingle id acc) st.hand ms
+                let addPieces = List.fold (fun acc (id, c) -> MultiSet.add id c acc) remPieces newPieces
+                let st' = State.mkState st.playerNumber addPieces  // This state needs to be updated
                 aux st'
             | RCM (CMPlayed (pid, ms, points)) ->
                 (* Successful play by other player. Update your state *)
+                debugPrint "CMPlayed"
+                debugPrint (sprintf "pid: %d" pid)
+                debugPrint (sprintf "ms: %A" ms)
+                debugPrint (sprintf "points: %d" points)
                 let st' = st // This state needs to be updated
                 aux st'
             | RCM (CMPlayFailed (pid, ms)) ->
                 (* Failed play. Update your state *)
+                debugPrint "CMPlayFailed"
+                debugPrint (sprintf "pid: %d" pid)
+                debugPrint (sprintf "ms: %A" ms)
                 let st' = st // This state needs to be updated
                 aux st'
             | RCM (CMGameOver _) -> ()

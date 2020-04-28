@@ -15,7 +15,7 @@ let spawnMultiples name bot =
 [<EntryPoint>]
 
 let main argv =
-    DebugPrint.debugFlag <- false // Change to false to supress debug output
+    DebugPrint.debugFlag <- true // Change to false to supress debug output
 
     let board      = StandardBoard.standardBoard ()
 //    let board      = InfiniteBoard.infiniteBoard ()
