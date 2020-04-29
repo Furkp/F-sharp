@@ -13,6 +13,7 @@ open DebugPrint
 open Eval
 open Parser
 open FParsec
+open StateMonad
 
 module RegEx =
     open System.Text.RegularExpressions
@@ -142,27 +143,49 @@ module Scrabble =
                       player turn = %d
                       hand =  %A
                       timeout = %A\n\n" numPlayers playerNumber playerTurn hand timeout)
-        debugPrint (boardP.prog)
+        // debugPrint ("---------------")
 
         let stmParser = ImpParser.runTextParser ImpParser.stmParse  
         let stm = stmParser boardP.prog
         
-        debugPrint "stm"
-        debugPrint "stm"
-        debugPrint "stm"
-        debugPrint "stm"
-        debugPrint(sprintf "%A" stm)
+        // debugPrint (sprintf "--------------- stm ---------------
+                    
+                    // // ")
+        // debugPrint(sprintf "%A" stm)
         // debugPrint (sprintf "stm: %A" stm)
-        debugPrint "/stm"
+        // debugPrint (sprintf "
+        
+        // --------------- /stm ---------------")
+        
+        
+        let sqs = boardP.squares
 
-        debugPrint (sprintf "/stm")
-        // let sqs = boardP.squares
-        // let a (b:squareProg) = 4
-        // let map = Map.map (fun k v -> Map.map (fun k2 v2 -> 
-        //     debugPrint(v2) 
-        //     stmntToBoardFun (stmParser v2)) v) sqs
-        // let boardFun = stmntToBoardFun 
-        // debugPrint (stm)
+        let map = Map.map (fun k v -> Map.map (fun k2 v2 -> stmntToSquareFun (stmParser v2)) v) sqs
+        
+        let boardFun = stmntToBoardFun stm map
+        
+        // let evalSquare w pos acc =
+        //     function
+        //     | Some m -> 
+        //       Map.map (fun k (f:squareFun) -> f w pos acc ) m
+        //     | None -> Map.ofList [0, 0]
+            
+        // let toString =
+        //     function
+        //     | (Some x) -> string x
+        //     | None    -> "#"
+            
+        // for y in -10..10 do
+        //     for x in -10..10 do
+        //         printf "%A " (boardFun (x, y) |> evalSquare hello 1 3 )
+        //     printfn ""
+        
+        // debugPrint (sprintf "
+        
+        // --------------- /board ---------------")
+        // debugPrint (boardP.prog)
+
+
 
         let handSet = List.fold (fun acc (x, k) -> MultiSet.add x k acc) MultiSet.empty hand
 
