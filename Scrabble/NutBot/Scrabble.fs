@@ -42,9 +42,19 @@ module State =
     // keep track of other useful
     // information, such as number of players, player turn, etc.
 
-    type state = {
+    type HandState = {
         playerNumber  : uint32
         hand          : MultiSet.MultiSet<uint32>
+    }
+
+    type BoardState = {
+        center : coord 
+        defaultSquare : squareFun
+        squares       : boardFun
+        placedSquare : Map<int,squareFun>
+        boardFunc : coord -> Map<int, squareFun> 
+    }
+
     }
 
     let mkState pn h = { playerNumber = pn; hand = h }
