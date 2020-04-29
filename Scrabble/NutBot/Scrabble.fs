@@ -59,8 +59,6 @@ module State =
         boardFunc : coord -> Map<int, squareFun> 
     }
 
-    }
-
     let mkState pn h = { playerNumber = pn; hand = h }
 
     let newState pn hand = mkState pn hand
@@ -71,9 +69,9 @@ module State =
 module Scrabble =
     open System.Threading
 
-    let playGame cstream pieces (st : State.state) =
+    let playGame cstream pieces (st : State.HandState) =
 
-        let rec aux (st : State.state) =
+        let rec aux (st : State.HandState) =
             Thread.Sleep(5000) // only here to not confuse the pretty-printer. Remove later.
             Print.printHand pieces (State.hand st)
 
@@ -144,15 +142,18 @@ module Scrabble =
                       player turn = %d
                       hand =  %A
                       timeout = %A\n\n" numPlayers playerNumber playerTurn hand timeout)
-        // debugPrint (boardP.prog)
+        debugPrint (boardP.prog)
 
         let stmParser = ImpParser.runTextParser ImpParser.stmParse  
         let stm = stmParser boardP.prog
         
-        printfn "stm"
-        printfn "%A" stm
+        debugPrint "stm"
+        debugPrint "stm"
+        debugPrint "stm"
+        debugPrint "stm"
+        debugPrint(sprintf "%A" stm)
         // debugPrint (sprintf "stm: %A" stm)
-        printfn "/stm"
+        debugPrint "/stm"
 
         debugPrint (sprintf "/stm")
         // let sqs = boardP.squares
