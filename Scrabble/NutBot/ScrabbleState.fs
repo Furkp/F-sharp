@@ -1,0 +1,3 @@
+namespace NutBot
+module ScrabbleState  
+   
