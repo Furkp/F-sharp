@@ -91,7 +91,7 @@ module ImpParser =
 
     let parenthesise p = pchar '(' >*>. p .>*> pchar ')'
 
-    let pid = letterChar .>>. (many alphaNumeric |>> charListToStr) |>> fun (a, b) -> string a+b
+    let pid = pchar '_' <|> letterChar .>>. (many (alphaNumeric <|> pchar '_' ) |>> charListToStr) |>> fun (a, b) -> string a+b
 
     let unop op a = op >*>. a
 
