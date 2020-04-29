@@ -5,12 +5,11 @@ open ScrabbleLib
 open ScrabbleServer
 open ScrabbleUtil
 open ScrabbleUtil.ServerCommunication
-
+open ScrabbleState
 open System.Net.Sockets
 open System.IO
 open DebugPrint
 
-open Eval
 open Parser
 open FParsec
 
@@ -40,50 +39,25 @@ module RegEx =
         hand |>
         MultiSet.fold (fun _ x i -> forcePrint (sprintf "%d -> (%A, %d)\n" x (Map.find x pieces) i)) ()
 
-module State = 
-    // Make sure to keep your state localised in this module. It makes your life a whole lot easier.
-    // Currently, it only keeps track of your hand, and your player numer but it could, potentially, 
-    // keep track of other useful
-    // information, such as number of players, player turn, etc.
 
-    type HandState = {
-        playerNumber  : uint32
-        hand          : MultiSet.MultiSet<uint32>
-    }
-
-    type BoardState = {
-        center : coord 
-        defaultSquare : squareFun
-        squares       : boardFun
-        placedSquare : Map<int,squareFun>
-        boardFunc : coord -> Map<int, squareFun> 
-    }
-
-    let mkState pn h = { playerNumber = pn; hand = h }
-
-    let newState pn hand = mkState pn hand
-    
-    let playerNumber st  = st.playerNumber
-    let hand st          = st.hand
 
 module Scrabble =
     open System.Threading
 
-    let playGame cstream pieces (st : State.HandState) =
+    let playGame cstream pieces (st : ScrabbleState.Hand) =
 
-        let rec aux (st : State.HandState) =
+        let rec aux (st : ScrabbleState.Hand) =
             Thread.Sleep(5000) // only here to not confuse the pretty-printer. Remove later.
-            Print.printHand pieces (State.hand st)
-
+            
             // remove the force print when you move on from manual input (or when you have learnt the format)
             let input =  System.Console.ReadLine()
             let move = RegEx.parseMove input
 
-            debugPrint (sprintf "Player %d -> Server:\n%A\n" (State.playerNumber st) (SMPass)) // keep the debug lines. They are useful.
+            debugPrint (sprintf "Player %d -> Server:\n%A\n" (ScrabbleState.playerNumber st) (SMPass)) // keep the debug lines. They are useful.
             send cstream (SMPlay move)
 
             let msg = recv cstream
-            debugPrint (sprintf "Player %d <- Server:\n%A\n" (State.playerNumber st) msg) // keep the debug lines. They are useful.
+            debugPrint (sprintf "Player %d <- Server:\n%A\n" (ScrabbleState.playerNumber st) msg) // keep the debug lines. They are useful.
 
             match msg with
             | RCM (CMPassed i) -> 
@@ -98,9 +72,9 @@ module Scrabble =
                 debugPrint (sprintf "ms: %A" ms)
                 debugPrint (sprintf "points: %d" points)
                 debugPrint (sprintf "newPieces: %A" newPieces)
-                let remPieces = List.fold (fun acc (c, (id, (ch, p))) -> MultiSet.removeSingle id acc) st.hand ms
+                let remPieces = List.fold (fun acc (c, (id, (ch, p))) -> MultiSet.removeSingle id acc) (ScrabbleState.hand st) ms
                 let addPieces = List.fold (fun acc (id, c) -> MultiSet.add id c acc) remPieces newPieces
-                let st' = State.mkState st.playerNumber addPieces  // This state needs to be updated
+                let st' = ScrabbleState.mkState st.playerNumber addPieces  // This state needs to be updated
                 aux st'
             | RCM (CMPlayed (pid, ms, points)) ->
                 (* Successful play by other player. Update your state *)
@@ -166,5 +140,5 @@ module Scrabble =
 
         let handSet = List.fold (fun acc (x, k) -> MultiSet.add x k acc) MultiSet.empty hand
 
-        fun () -> playGame cstream tiles (State.newState playerNumber handSet )
+        fun () -> playGame cstream tiles (ScrabbleState.newState playerNumber handSet )
         
