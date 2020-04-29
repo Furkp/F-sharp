@@ -9,7 +9,7 @@ module ScrabbleState  =
     // keep track of other useful
     // information, such as number of players, player turn, etc.
 
-    type Hand = {
+    type HandState = {
         playerNumber  : uint32
         hand          : MultiSet.MultiSet<uint32>
     }

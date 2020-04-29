@@ -11,8 +11,10 @@ open System.IO
 open DebugPrint
 
 open Parser
+open Eval
 open FParsec
 open StateMonad
+open MultiSet
 
 module RegEx =
     open System.Text.RegularExpressions
@@ -45,20 +47,20 @@ module RegEx =
 module Scrabble =
     open System.Threading
 
-    let playGame cstream pieces (st : ScrabbleState.Hand) =
+    let playGame cstream pieces (st : HandState) =
 
-        let rec aux (st : ScrabbleState.Hand) =
+        let rec aux (st : HandState) =
             Thread.Sleep(5000) // only here to not confuse the pretty-printer. Remove later.
             
             // remove the force print when you move on from manual input (or when you have learnt the format)
             let input =  System.Console.ReadLine()
             let move = RegEx.parseMove input
 
-            debugPrint (sprintf "Player %d -> Server:\n%A\n" (ScrabbleState.playerNumber st) (SMPass)) // keep the debug lines. They are useful.
+            debugPrint (sprintf "Player %d -> Server:\n%A\n" (playerNumber st) (SMPass)) // keep the debug lines. They are useful.
             send cstream (SMPlay move)
 
             let msg = recv cstream
-            debugPrint (sprintf "Player %d <- Server:\n%A\n" (ScrabbleState.playerNumber st) msg) // keep the debug lines. They are useful.
+            debugPrint (sprintf "Player %d <- Server:\n%A\n" (playerNumber st) msg) // keep the debug lines. They are useful.
 
             match msg with
             | RCM (CMPassed i) -> 
@@ -73,7 +75,7 @@ module Scrabble =
                 debugPrint (sprintf "ms: %A" ms)
                 debugPrint (sprintf "points: %d" points)
                 debugPrint (sprintf "newPieces: %A" newPieces)
-                let remPieces = List.fold (fun acc (c, (id, (ch, p))) -> MultiSet.removeSingle id acc) (ScrabbleState.hand st) ms
+                let remPieces = List.fold (fun acc (c, (id, (ch, p))) -> MultiSet.removeSingle id acc) (st.hand) ms
                 let addPieces = List.fold (fun acc (id, c) -> MultiSet.add id c acc) remPieces newPieces
                 let st' = ScrabbleState.mkState st.playerNumber addPieces  // This state needs to be updated
                 aux st'
@@ -163,5 +165,5 @@ module Scrabble =
 
         let handSet = List.fold (fun acc (x, k) -> MultiSet.add x k acc) MultiSet.empty hand
 
-        fun () -> playGame cstream tiles (ScrabbleState.newState playerNumber handSet )
+        fun () -> playGame cstream tiles (newState playerNumber handSet)
         
