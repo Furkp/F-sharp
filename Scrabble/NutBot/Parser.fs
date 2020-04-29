@@ -1,4 +1,4 @@
-﻿module Ass7
+﻿module Parser
 
 open System
 open FParsec
@@ -82,13 +82,6 @@ module ImpParser =
     let pToUpper = pstring "toUpper"
     let pToLower = pstring "toLower"
     let pCharValue = pstring "charValue"
-    let pTrue = pstring "true"
-    let pFalse = pstring "false"
-    let pif = pstring "if"
-    let pthen = pstring "then"
-    let pelse = pstring "else"
-    let pwhile = pstring "while"
-    let pdo = pstring "do"
     
     let (.>*>.) p1 p2 =
         p1 .>> spaces >>= (fun r1 -> p2 >>= fun r2 -> preturn (r1, r2)) 
@@ -98,7 +91,7 @@ module ImpParser =
 
     let parenthesise p = pchar '(' >*>. p .>*> pchar ')'
 
-    let pid = letterChar .>>. (many alphaNumeric |>> charListToStr) |>> fun (a, b) -> string a+b
+    let pid = letterChar <|> pchar '_' .>>. (many alphaNumeric |>> charListToStr) |>> fun (a, b) -> string a+b
 
     let unop op a = op >*>. a
 

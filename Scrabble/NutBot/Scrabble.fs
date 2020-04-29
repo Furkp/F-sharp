@@ -10,6 +10,10 @@ open System.Net.Sockets
 open System.IO
 open DebugPrint
 
+open Eval
+open Parser
+open FParsec
+
 module RegEx =
     open System.Text.RegularExpressions
 
@@ -130,7 +134,25 @@ module Scrabble =
                       player turn = %d
                       hand =  %A
                       timeout = %A\n\n" numPlayers playerNumber playerTurn hand timeout)
-                  
+        // debugPrint (boardP.prog)
+
+        let stmParser = ImpParser.runTextParser ImpParser.stmParse  
+        let stm = stmParser boardP.prog
+        
+        printfn "stm"
+        printfn "%A" stm
+        // debugPrint (sprintf "stm: %A" stm)
+        printfn "/stm"
+
+        debugPrint (sprintf "/stm")
+        // let sqs = boardP.squares
+        // let a (b:squareProg) = 4
+        // let map = Map.map (fun k v -> Map.map (fun k2 v2 -> 
+        //     debugPrint(v2) 
+        //     stmntToBoardFun (stmParser v2)) v) sqs
+        // let boardFun = stmntToBoardFun 
+        // debugPrint (stm)
+
         let handSet = List.fold (fun acc (x, k) -> MultiSet.add x k acc) MultiSet.empty hand
 
         fun () -> playGame cstream tiles (State.newState playerNumber handSet )

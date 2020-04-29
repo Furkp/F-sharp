@@ -1,6 +1,7 @@
 ﻿module Eval
 
     open StateMonad
+    open Parser
 
     (* Code for testing *)
     
@@ -25,38 +26,6 @@
                 match v2 with
                 | 0 -> fail DivisionByZero
                 | n -> ret (v1/v2)))
-     
-    type aExp =
-        | N of int
-        | V of string
-        | WL
-        | PV of aExp
-        | Add of aExp * aExp
-        | Sub of aExp * aExp
-        | Mul of aExp * aExp
-        | Div of aExp * aExp
-        | Mod of aExp * aExp
-        | CharToInt of cExp
-
-    and cExp =
-       | C  of char  (* Character value *)
-       | CV of aExp  (* Character lookup at word index *)
-       | ToUpper of cExp
-       | ToLower of cExp
-       | IntToChar of aExp
-
-    type bExp =             
-       | TT                   (* true *)
-       | FF                   (* false *)
-
-       | AEq of aExp * aExp   (* numeric equality *)
-       | ALt of aExp * aExp   (* numeric less than *)
-
-       | Not of bExp          (* boolean not *)
-       | Conj of bExp * bExp  (* boolean conjunction *)
-
-       | IsVowel of cExp      (* check for vowel *)
-       | IsConsonant of cExp  (* check for constant *)
 
     let (.+.) a b = Add (a, b)
     let (.-.) a b = Sub (a, b)
@@ -137,13 +106,13 @@
             | IsVowel(x) -> charEval x >>= fun v -> ret (isVowel v)
             | IsConsonant(x) -> charEval x >>= fun v -> ret (isConsonant v)
 
-    type stm =                (* statements *)
-    | Declare of string       (* variable declaration *)
-    | Ass of string * aExp    (* variable assignment *)
-    | Skip                    (* nop *)
-    | Seq of stm * stm        (* sequential composition *)
-    | ITE of bExp * stm * stm (* if-then-else statement *)
-    | While of bExp * stm     (* while statement *)
+    // type stm =                (* statements *)
+    // | Declare of string       (* variable declaration *)
+    // | Ass of string * aExp    (* variable assignment *)
+    // | Skip                    (* nop *)
+    // | Seq of stm * stm        (* sequential composition *)
+    // | ITE of bExp * stm * stm (* if-then-else statement *)
+    // | While of bExp * stm     (* while statement *)
 
     let rec stmntEval stmnt : SM<unit> = 
         match stmnt with
@@ -303,13 +272,13 @@
         placed        : Map<int * int, (int * char)>
     }
 
-    type squareProg = Map<int, string>
-    type boardProg = {
-        prog       : stm;
-        squares    : Map<int, Map<int, squareFun>>
-    }
+    // type squareProg = Map<int, string>
+    // type boardProg = {
+    //     prog       : stm;
+    //     squares    : Map<int, Map<int, squareFun>>
+    // }
 
-    let mkBoard c defaultSq boardStmnt ids = 
-       { center = c;
-         defaultSquare = stmntToSquareFun defaultSq;
-         squares = stmntToBoardFun boardStmnt (List.map (fun (x, y) -> (x, stmntToSquareFun y)) ids |> Map.ofList)}
+    // let mkBoard c defaultSq boardStmnt ids = 
+    //    { center = c;
+    //      defaultSquare = stmntToSquareFun defaultSq;
+    //      squares = stmntToBoardFun boardStmnt (List.map (fun (x, y) -> (x, stmntToSquareFun y)) ids |> Map.ofList)}
