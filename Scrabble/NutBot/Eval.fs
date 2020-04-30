@@ -262,15 +262,7 @@
                 evalSM (mkState [("_x_", x); ("_y_", y); ("_result_", 0)] [] ["_x_"; "_y_"; "_result_"]) |> function
                 | Success x -> x
                 | Failure err -> failwith (sprintf "Error: %A" err)) 
-        
-                
-    
-    type board = {
-        center        : coord
-        defaultSquare : squareFun
-        squares       : boardFun
-        placed        : Map<int * int, (int * char)>
-    }
+
 
     // type squareProg = Map<int, string>
     // type boardProg = {

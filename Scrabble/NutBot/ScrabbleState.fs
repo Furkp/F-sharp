@@ -1,5 +1,6 @@
 namespace NutBot
 
+open ScrabbleUtil
 open MultiSet
 open Eval
 
@@ -15,11 +16,9 @@ module ScrabbleState  =
     }
 
     type Board = {
+        boardFunc : boardFun
         center : coord 
-        defaultSquare : squareFun
-        squares       : boardFun
-        placedSquare : Map<int,squareFun>
-        boardFunc : coord -> Map<int, squareFun> 
+        usedTiles : Map<int * int, tile>
     }
 
     // type Direction = 
