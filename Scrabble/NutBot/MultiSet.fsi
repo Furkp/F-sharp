@@ -1,4 +1,4 @@
-namespace NutBot
+namespace MultiSet
 module MultiSet =
 
     type MultiSet<'a when 'a : comparison> = MultiSet of Map<'a,uint32>

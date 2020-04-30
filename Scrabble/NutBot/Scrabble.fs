@@ -51,7 +51,8 @@ module Scrabble =
 
         let rec aux (st : HandState) =
             Thread.Sleep(5000) // only here to not confuse the pretty-printer. Remove later.
-            
+            Print.printHand pieces (st.hand)
+
             // remove the force print when you move on from manual input (or when you have learnt the format)
             let input =  System.Console.ReadLine()
             let move = RegEx.parseMove input
@@ -75,8 +76,8 @@ module Scrabble =
                 debugPrint (sprintf "ms: %A" ms)
                 debugPrint (sprintf "points: %d" points)
                 debugPrint (sprintf "newPieces: %A" newPieces)
-                let remPieces = List.fold (fun acc (c, (id, (ch, p))) -> NutBot.MultiSet.removeSingle id acc) (st.hand) ms
-                let addPieces = List.fold (fun acc (id, c) -> NutBot.MultiSet.add id c acc) remPieces newPieces
+                let remPieces = List.fold (fun acc (c, (id, (ch, p))) -> MultiSet.removeSingle id acc) (st.hand) ms
+                let addPieces = List.fold (fun acc (id, c) -> MultiSet.add id c acc) remPieces newPieces
                 let st' = ScrabbleState.mkState st.playerNumber addPieces  // This state needs to be updated
                 aux st'
             | RCM (CMPlayed (pid, ms, points)) ->
@@ -160,7 +161,7 @@ module Scrabble =
 
 
 
-        let handSet = List.fold (fun acc (x, k) -> NutBot.MultiSet.add x k acc) NutBot.MultiSet.empty hand
+        let handSet = List.fold (fun acc (x, k) -> MultiSet.add x k acc) MultiSet.empty hand
         // Print.printHand handSet tiles
 
 

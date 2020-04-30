@@ -1,4 +1,4 @@
-namespace NutBot
+namespace MultiSet
 module MultiSet =
 
     [<StructuredFormatDisplay("{AsString}")>]
