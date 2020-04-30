@@ -1,5 +1,6 @@
 [Bb]in/
 [Oo]bj/
-.ionide/
+.ionide/**
 .ionide
-**/*.db
+.ionide/symbolCache.db
+**/.ionide/symbolCache.db

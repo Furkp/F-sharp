@@ -14,13 +14,13 @@ module ScrabbleState  =
     type Board = {
         center : coord 
         usedTiles : Map<int * int, tile>
-        boardFunc : coord -> Map<int, squareFun> 
+        boardFunc : boardFun
     }
 
     type HandState = {
         playerNumber  : uint32
         hand          : MultiSet.MultiSet<uint32>
-        board : Board
+        board         : Board
     }
 
 
@@ -32,16 +32,36 @@ module ScrabbleState  =
     //     | Up of int * int
 
 
-    let mkState pn h b = { playerNumber = pn; hand = h; board = b}
-    let newState pn hand board = mkState pn hand board
+    let newState pn h c u b = { 
+        playerNumber = pn; 
+        hand = h; 
+        board = {
+            center = c;
+            usedTiles = u;
+            boardFunc = b;
+        }
+    }
     
+   
     let board st = st.board
     let playerNumber st  = st.playerNumber
     let hand st          = st.hand
- // let center st = st.center
- // let usedTiles st = st.usedTiles
- // let boardFunc st = st.boardFunc
+    
+    let center st = st.board.center
+    let usedTiles st = st.board.usedTiles
+    let boardFunc st = st.board.boardFunc
+    
+    let addToHand newPieces st = 
+        let addPieces = List.fold (fun acc (id, c) -> MultiSet.add id c acc) (hand st) newPieces        
+        newState (playerNumber st) (addPieces) (center st) (usedTiles st) (boardFunc st)
 
+    let remFromHand ms st = 
+        let remPieces = List.fold (fun acc (c, (id, (ch, p))) -> MultiSet.removeSingle id acc) (hand st) ms 
+        newState (playerNumber st) (remPieces) (center st) (usedTiles st) (boardFunc st)
+    
+    let addToBoard ms st = 
+        let placedTiles = List.fold (fun (acc:Map<int*int, tile>) (c, (id, (ch, p))) -> acc.Add(c, (Set.empty.Add(ch, p)))) (usedTiles st) (ms) 
+        newState (playerNumber st) (hand st) (center st) (placedTiles) (boardFunc st)
     // let oppositeDirection = 
     //     function 
     //     | Right -> Left 

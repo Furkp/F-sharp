@@ -67,32 +67,19 @@ module Scrabble =
             | RCM (CMPassed i) -> 
                 (* your idiot of a enemy passed*)
                 debugPrint "Enemy passed" 
-                debugPrint (sprintf "id: %d" i)
                 let st' = st // This state needs to be updated
                 aux st'
             | RCM (CMPlaySuccess(ms, points, newPieces)) ->
                 (* Successful play by you. Update your state (remove old tiles, add the new ones, change turn, etc) *)
-                debugPrint "CMPlaySuccess"
-                debugPrint (sprintf "ms: %A" ms)
-                debugPrint (sprintf "points: %d" points)
-                debugPrint (sprintf "newPieces: %A" newPieces)
-                let remPieces = List.fold (fun acc (c, (id, (ch, p))) -> MultiSet.removeSingle id acc) (st.hand) ms
-                let addPieces = List.fold (fun acc (id, c) -> MultiSet.add id c acc) remPieces newPieces
-                let st' = ScrabbleState.mkState st.playerNumber addPieces  // This state needs to be updated
+                // This state needs to be updated
+                let st' = st |> remFromHand ms |> addToHand newPieces |> addToBoard ms
                 aux st'
             | RCM (CMPlayed (pid, ms, points)) ->
                 (* Successful play by other player. Update your state *)
-                debugPrint "CMPlayed"
-                debugPrint (sprintf "pid: %d" pid)
-                debugPrint (sprintf "ms: %A" ms)
-                debugPrint (sprintf "points: %d" points)
-                let st' = st // This state needs to be updated
+                let st' = st |> addToBoard ms // This state needs to be updated
                 aux st'
             | RCM (CMPlayFailed (pid, ms)) ->
                 (* Failed play. Update your state *)
-                debugPrint "CMPlayFailed"
-                debugPrint (sprintf "pid: %d" pid)
-                debugPrint (sprintf "ms: %A" ms)
                 let st' = st // This state needs to be updated
                 aux st'
             | RCM (CMGameOver _) -> ()
@@ -120,52 +107,16 @@ module Scrabble =
                       player turn = %d
                       hand =  %A
                       timeout = %A\n\n" numPlayers playerNumber playerTurn hand timeout)
-        // debugPrint ("---------------")
-
+        
         let stmParser = ImpParser.runTextParser ImpParser.stmParse  
         let stm = stmParser boardP.prog
-        
-        debugPrint (sprintf "--------------- stm ---------------
-                    
-                    // ")
-        debugPrint (sprintf "%A" tiles)
-        debugPrint (sprintf "
-        
-        --------------- /stm ---------------")        
-        
-        let sqs = boardP.squares
+        let map = Map.map (fun k v -> Map.map (fun k2 v2 -> stmntToSquareFun (stmParser v2)) v) boardP.squares
 
-        let map = Map.map (fun k v -> Map.map (fun k2 v2 -> stmntToSquareFun (stmParser v2)) v) sqs
-        
         let boardFun = stmntToBoardFun stm map
         
-        // let evalSquare w pos acc =
-        //     function
-        //     | Some m -> 
-        //       Map.map (fun k (f:squareFun) -> f w pos acc ) m
-        //     | None -> Map.ofList [0, 0]
-            
-        // let toString =
-        //     function
-        //     | (Some x) -> string x
-        //     | None    -> "#"
-            
-        // for y in -10..10 do
-        //     for x in -10..10 do
-        //         printf "%A " (boardFun (x, y) |> evalSquare hello 1 3 )
-        //     printfn ""
-        
-        // debugPrint (sprintf "
-        
-        // --------------- /board ---------------")
-
-
-
         let handSet = List.fold (fun acc (x, k) -> MultiSet.add x k acc) MultiSet.empty hand
-        // Print.printHand handSet tiles
 
+        let state = newState playerNumber handSet boardP.center Map.empty boardFun
 
-        debugPrint (boardP.prog)
-
-        fun () -> playGame cstream tiles (newState playerNumber handSet)
+        fun () -> playGame cstream tiles state
         
