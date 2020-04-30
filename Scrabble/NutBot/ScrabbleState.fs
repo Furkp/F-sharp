@@ -1,8 +1,8 @@
 namespace NutBot
 
-open ScrabbleUtil
 open MultiSet
 open Eval
+open ScrabbleUtil
 
 module ScrabbleState  = 
     // Make sure to keep your state localised in this module. It makes your life a whole lot easier.
@@ -10,16 +10,19 @@ module ScrabbleState  =
     // keep track of other useful
     // information, such as number of players, player turn, etc.
 
+    
+    type Board = {
+        center : coord 
+        usedTiles : Map<int * int, tile>
+        boardFunc : coord -> Map<int, squareFun> 
+    }
+
     type HandState = {
         playerNumber  : uint32
         hand          : MultiSet.MultiSet<uint32>
+        board : Board
     }
 
-    type Board = {
-        boardFunc : boardFun
-        center : coord 
-        usedTiles : Map<int * int, tile>
-    }
 
     // type Direction = 
     //     // Up and Left are the wrong direction for words and only used when going in reverse with GADDAG
@@ -29,12 +32,15 @@ module ScrabbleState  =
     //     | Up of int * int
 
 
-    let mkState pn h = { playerNumber = pn; hand = h }
-
-    let newState pn hand = mkState pn hand
+    let mkState pn h b = { playerNumber = pn; hand = h; board = b}
+    let newState pn hand board = mkState pn hand board
     
+    let board st = st.board
     let playerNumber st  = st.playerNumber
     let hand st          = st.hand
+ // let center st = st.center
+ // let usedTiles st = st.usedTiles
+ // let boardFunc st = st.boardFunc
 
     // let oppositeDirection = 
     //     function 
