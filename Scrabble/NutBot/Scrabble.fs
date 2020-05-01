@@ -58,9 +58,10 @@ module Scrabble =
             // remove the force print when you move on from manual input (or when you have learnt the format)
             let input =  System.Console.ReadLine()
             let move = getMove st
+            let play = if move.Length = 0 then SMPass else SMPlay move
 
             debugPrint (sprintf "Player %d -> Server:\n%A\n" (playerNumber st) (SMPass)) // keep the debug lines. They are useful.
-            send cstream (SMPlay move)
+            send cstream (play)
 
             let msg = recv cstream
             debugPrint (sprintf "Player %d <- Server:\n%A\n" (playerNumber st) msg) // keep the debug lines. They are useful.
@@ -120,7 +121,7 @@ module Scrabble =
         let dict = List.fold (fun acc s -> insert s acc) (empty alphabet) words
         let charToId = Map.fold (fun acc k (v:tile) -> Map.add (if k > 0u then fst v.MaximumElement else '*') k acc) Map.empty tiles
 
-        let state = newState playerNumber handSet dict charToId boardP.center Map.empty boardFun
+        let state = newState playerNumber handSet dict charToId tiles boardP.center Map.empty boardFun
 
         fun () -> playGame cstream tiles state
         

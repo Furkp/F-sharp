@@ -23,6 +23,7 @@ module ScrabbleState  =
         hand          : MultiSet.MultiSet<uint32>
         dictionary    : Dictionary
         charToInt     : Map<char, uint32>
+        tiles         : Map<uint32, tile>
         board         : Board
     }
 
@@ -38,11 +39,12 @@ module ScrabbleState  =
         | UnusedSquare of Map<int, squareFun>
         | Hole
 
-    let newState pn h d chti c u b = { 
+    let newState pn h d chti t c u b = { 
         playerNumber = pn; 
         hand = h;
         dictionary = d;
         charToInt = chti;
+        tiles = t;
         board = {
             center = c;
             usedTiles = u;
@@ -60,18 +62,24 @@ module ScrabbleState  =
     let boardFunc st = st.board.boardFunc
     let dictionary st = st.dictionary
     let charToInt st = st.charToInt
-    
+    let tiles st = st.tiles
+    let getId st c = Map.find c st.charToInt |> int
+    let getChar st id = Map.find id (tiles st) |> (fun s -> s.MaximumElement) |> fst
+    let getPoints st id = Map.find id (tiles st) |> (fun s -> s.MaximumElement) |> snd
+    let getPointsFromChar st c = Map.find (getId st c |> uint32) (tiles st) |> (fun s -> s.MaximumElement) |> snd
+
+
     let addToHand newPieces st = 
         let addPieces = List.fold (fun acc (id, c) -> MultiSet.add id c acc) (hand st) newPieces        
-        newState (playerNumber st) (addPieces) (dictionary st) (charToInt st) (center st) (usedTiles st) (boardFunc st)
+        newState (playerNumber st) (addPieces) (dictionary st) (charToInt st) (tiles st) (center st) (usedTiles st) (boardFunc st)
 
     let remFromHand ms st = 
         let remPieces = List.fold (fun acc (c, (id, (ch, p))) -> MultiSet.removeSingle id acc) (hand st) ms 
-        newState (playerNumber st) (remPieces) (dictionary st) (charToInt st) (center st) (usedTiles st) (boardFunc st)
+        newState (playerNumber st) (remPieces) (dictionary st) (charToInt st) (tiles st) (center st) (usedTiles st) (boardFunc st)
     
     let addToBoard ms st = 
         let placedTiles = List.fold (fun (acc:Map<int*int, tile>) (c, (id, (ch, p))) -> acc.Add(c, (Set.empty.Add(ch, p)))) (usedTiles st) (ms) 
-        newState (playerNumber st) (hand st) (dictionary st) (charToInt st) (center st) (placedTiles) (boardFunc st)
+        newState (playerNumber st) (hand st) (dictionary st) (charToInt st) (tiles st) (center st) (placedTiles) (boardFunc st)
     
     let query st c = 
         match usedTiles st |> Map.tryFind(c) with

@@ -49,3 +49,8 @@ let rec contains (s:string) =
         -> contains (s.Substring 1) (m.Item (s.Chars 0))
     | Node(_, _) 
         -> None
+
+let isEnd = 
+    function
+    | Leaf b -> b
+    | Node (b, _) -> b    
