@@ -15,6 +15,8 @@ open Eval
 open FParsec
 open StateMonad
 open MultiSet
+open Dictionary
+open NutBot
 
 module RegEx =
     open System.Text.RegularExpressions
@@ -55,7 +57,7 @@ module Scrabble =
 
             // remove the force print when you move on from manual input (or when you have learnt the format)
             let input =  System.Console.ReadLine()
-            let move = RegEx.parseMove input
+            let move = getMove st
 
             debugPrint (sprintf "Player %d -> Server:\n%A\n" (playerNumber st) (SMPass)) // keep the debug lines. They are useful.
             send cstream (SMPlay move)
@@ -106,8 +108,8 @@ module Scrabble =
                       player id = %d
                       player turn = %d
                       hand =  %A
-                      timeout = %A\n\n" numPlayers playerNumber playerTurn hand timeout)
-        
+                      timeout = %A\n\n" numPlayers playerNumber playerTurn boardP.squares timeout)
+        Thread.Sleep(100000)
         let stmParser = ImpParser.runTextParser ImpParser.stmParse  
         let stm = stmParser boardP.prog
         let map = Map.map (fun k v -> Map.map (fun k2 v2 -> stmntToSquareFun (stmParser v2)) v) boardP.squares
@@ -115,8 +117,10 @@ module Scrabble =
         let boardFun = stmntToBoardFun stm map
         
         let handSet = List.fold (fun acc (x, k) -> MultiSet.add x k acc) MultiSet.empty hand
+        let dict = List.fold (fun acc s -> insert s acc) (empty alphabet) words
+        let charToId = Map.fold (fun acc k (v:tile) -> Map.add (if k > 0u then fst v.MaximumElement else '*') k acc) Map.empty tiles
 
-        let state = newState playerNumber handSet boardP.center Map.empty boardFun
+        let state = newState playerNumber handSet dict charToId boardP.center Map.empty boardFun
 
         fun () -> playGame cstream tiles state
         

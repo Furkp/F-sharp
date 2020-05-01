@@ -78,5 +78,10 @@ module MultiSet =
     let subtract s1 s2 =
         fold (fun acc key value -> remove key value acc ) s1 s2
 
+    let banan = 1
+
     let intersection s1 s2 =
         subtract(union s1 s2) (union (subtract s1 s2) (subtract s2 s1))
+
+    let permutations s = 
+        List.fold (fun acc x -> (x, (removeSingle x s))::acc) [] (toList s)

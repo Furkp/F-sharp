@@ -38,3 +38,5 @@ module MultiSet =
     val subtract : MultiSet<'a> -> MultiSet<'a> -> MultiSet<'a>
 
     val intersection : MultiSet<'a> -> MultiSet<'a> -> MultiSet<'a>
+
+    val permutations : MultiSet<'a> -> ('a * MultiSet<'a>) list 

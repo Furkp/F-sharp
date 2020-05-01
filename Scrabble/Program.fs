@@ -39,7 +39,7 @@ let main argv =
     let players    = spawnMultiples "Oxy" Oxyphenbutazone.Startup.startGame 2
 
     // Uncomment this line to call your client
-    let players    = [("Nut", NutBot.Scrabble.startGame)] 
+    let players    = [("Nut", NutBot.Scrabble.startGame); ("Oxy", Oxyphenbutazone.Startup.startGame)] 
 
  
     do ScrabbleServer.Comm.startGame 

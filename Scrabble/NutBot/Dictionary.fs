@@ -37,3 +37,15 @@ let rec lookup (s:string) =
     | Node(_, _) 
         -> false
   
+let rec contains (s:string) =
+    function
+    | Leaf b when s.Length = 0 
+        -> Some (Leaf(b))
+    | Leaf _ 
+        -> None
+    | Node(b, m) when s.Length = 0
+        -> Some (Node(b, m))
+    | Node(_, m) when m.ContainsKey(s.Chars 0)
+        -> contains (s.Substring 1) (m.Item (s.Chars 0))
+    | Node(_, _) 
+        -> None
